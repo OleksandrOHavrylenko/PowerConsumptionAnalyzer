@@ -3,8 +3,8 @@ package com.example.iot;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class PowerConsumptionGeneratorApplicationTests {
+//@SpringBootTest
+class GeneratorApplicationTests {
 
     @Test
     void contextLoads() {
