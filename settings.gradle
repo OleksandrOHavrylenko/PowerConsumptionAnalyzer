@@ -1,2 +1,3 @@
 rootProject.name = 'power-consumption-analyzer'
 include 'power-consumption-generator'
+include 'power-consumption-processor'
