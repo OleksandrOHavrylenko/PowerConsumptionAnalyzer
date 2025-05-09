@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PowerConsumptionAnalyzerApplication {
+public class PowerConsumptionGeneratorApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(PowerConsumptionAnalyzerApplication.class, args);
+        SpringApplication.run(PowerConsumptionGeneratorApplication.class, args);
     }
 
 }
