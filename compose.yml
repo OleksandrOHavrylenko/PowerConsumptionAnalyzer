@@ -1,0 +1,36 @@
+services:
+  power-generator:
+    container_name: power-generator
+    image: power-generator
+    build:
+      context: .
+      dockerfile: Dockerfile-generator
+    volumes:
+      - ./power-consumption-generator/input:/app/input
+    networks:
+      - kafka-net
+    environment:
+      OUTPUT_TOPIC: "input-power"
+      DEAD_LETTER_QUEUE: "dlq"
+      INPUT_FILE_PATH: "input/power_consumption_data.txt"
+
+#  processor-history:
+#    container_name: processor-history
+#    image: processor-history
+#    build:
+#      context: .
+#      dockerfile: Dockerfile-processor
+#    ports:
+#      - 8080:8080
+#    networks:
+#      - kafka-net
+#    environment:
+#      INPUT_TOPIC: "history"
+#      APP_ID: "history-processor"
+#    depends_on:
+#      - producer-history
+
+networks:
+  kafka-net:
+    name: kafka-net
+    driver: bridge
