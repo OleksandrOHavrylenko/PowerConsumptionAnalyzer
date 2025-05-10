@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * @author Oleksandr Havrylenko
@@ -30,7 +31,7 @@ public class PowerConsMapper implements ModelMapper<PowerConsItem>{
             double subMetering2W = 0;
             double subMetering3W = 0;
             try {
-                date = LocalDate.parse(splittedData[0]);
+                date = LocalDate.parse(splittedData[0], DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                 time = LocalTime.parse(splittedData[1]);
                 globalActivePowerW = Double.parseDouble(splittedData[2]) * 1000;
                 globalReactivePowerW = Double.parseDouble(splittedData[3]) * 1000;
@@ -43,7 +44,7 @@ public class PowerConsMapper implements ModelMapper<PowerConsItem>{
                         voltageV, currentI, subMetering1W, subMetering2W, subMetering3W);
             } catch (NumberFormatException e) {
                 logger.error("Error during parsing data line={} ", nextLine, e);
-                throw new RuntimeException(e);
+                throw new RuntimeException(String.format("Error during parsing data line=%s", nextLine), e);
             }
         }
     }
