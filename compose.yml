@@ -14,21 +14,20 @@ services:
       DEAD_LETTER_QUEUE: "dlq"
       INPUT_FILE_PATH: "input/power_consumption_data.txt"
 
-#  processor-history:
-#    container_name: processor-history
-#    image: processor-history
-#    build:
-#      context: .
-#      dockerfile: Dockerfile-processor
-#    ports:
-#      - 8080:8080
-#    networks:
-#      - kafka-net
-#    environment:
-#      INPUT_TOPIC: "history"
-#      APP_ID: "history-processor"
-#    depends_on:
-#      - producer-history
+  power-processor:
+    container_name: power-processor
+    image: power-processor
+    build:
+      context: .
+      dockerfile: Dockerfile-processor
+    networks:
+      - kafka-net
+    environment:
+      INPUT_TOPIC: "input-power"
+      OUTPUT_TOPIC: "power-anomalies"
+      APP_ID: "power-consumption-processor"
+    depends_on:
+      - power-generator
 
 networks:
   kafka-net:

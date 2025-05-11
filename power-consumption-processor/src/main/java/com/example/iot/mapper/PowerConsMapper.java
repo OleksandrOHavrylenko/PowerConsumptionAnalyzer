@@ -31,7 +31,7 @@ public class PowerConsMapper implements ModelMapper<PowerConsItem>{
             double subMetering2W = 0;
             double subMetering3W = 0;
             try {
-                date = LocalDate.parse(splittedData[0], DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                date = LocalDate.parse(splittedData[0], DateTimeFormatter.ofPattern("d/M/yyyy"));
                 time = LocalTime.parse(splittedData[1]);
                 globalActivePowerW = Double.parseDouble(splittedData[2]) * 1000;
                 globalReactivePowerW = Double.parseDouble(splittedData[3]) * 1000;

@@ -36,6 +36,66 @@ class PowerConsMapperTest {
     }
 
     @Test
+    void correctLineDay1DigitTest() {
+        final String inputLine = "1/1/2007;17:24:00;4.216;0.418;234.840;18.400;0.000;1.000;17.000";
+
+        PowerConsItem expected = new PowerConsItem(
+                LocalDate.of(2007, 1, 1),
+                LocalTime.of(17, 24, 0),
+                4216.0,
+                418.0,
+                234.84,
+                18.4,
+                0.0,
+                1.0,
+                17.0);
+        PowerConsItem actual = mapper.parseLine(inputLine);
+
+        assertNotNull(actual);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void correctLineMonth1DigitTest() {
+        final String inputLine = "19/1/2007;17:24:00;4.216;0.418;234.840;18.400;0.000;1.000;17.000";
+
+        PowerConsItem expected = new PowerConsItem(
+                LocalDate.of(2007, 1, 19),
+                LocalTime.of(17, 24, 0),
+                4216.0,
+                418.0,
+                234.84,
+                18.4,
+                0.0,
+                1.0,
+                17.0);
+        PowerConsItem actual = mapper.parseLine(inputLine);
+
+        assertNotNull(actual);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void correctLineDay1Month1DigitTest() {
+        final String inputLine = "3/1/2007;17:24:00;4.216;0.418;234.840;18.400;0.000;1.000;17.000";
+
+        PowerConsItem expected = new PowerConsItem(
+                LocalDate.of(2007, 1, 3),
+                LocalTime.of(17, 24, 0),
+                4216.0,
+                418.0,
+                234.84,
+                18.4,
+                0.0,
+                1.0,
+                17.0);
+        PowerConsItem actual = mapper.parseLine(inputLine);
+
+        assertNotNull(actual);
+        assertEquals(expected, actual);
+    }
+
+    @Test
     void invalidLineLengthTest() {
         final String inputLine = "16/12/2006;17:24:00;?;?;?;18.400;0.000;1.000";
 

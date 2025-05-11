@@ -27,8 +27,9 @@ public class PowerConsumptionProcessor {
     private static final Logger logger = LoggerFactory.getLogger(PowerConsumptionProcessor.class);
     public static final String INPUT_TOPIC = System.getenv()
             .getOrDefault("INPUT_TOPIC", "input-power");
-    public static final String OUTPUT_TOPIC = "output-anomalies-detected";
-    public static final String DOMAIN_COUNTS_STORE = "anomalies-detected-store";
+    public static final String OUTPUT_TOPIC = System.getenv()
+            .getOrDefault("OUTPUT_TOPIC", "power-anomalies");
+    public static final String ANOMALIES_DETECTED_STORE = "anomalies-detected-store";
 
     private ModelMapper<PowerConsItem> modelMapper = new PowerConsMapper();
 
@@ -41,17 +42,19 @@ public class PowerConsumptionProcessor {
                 .mapValues(this::parseLine)
                 .filter((key, value) -> value.isPresent())
                 .mapValues(Optional::get)
+                .peek((key, value) -> logger.info("key: " + key + " value: " + value))
                 .mapValues(this::detectAnomalies)
                 .filter((key, value) -> value.isPresent())
                 .mapValues(Optional::get)
-                .peek((key, value) -> logger.debug("key: " + key + " value: " + value))
+                .peek((key, value) -> logger.info("Output => key: " + key + " value: " + value))
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), CustomSerdes.Anomaly()));
     }
 
 //    TODO fake method just for streams testing. Change to real AnomalyDetector
     private Optional<Anomaly> detectAnomalies(final String key, final PowerConsItem powerConsItem) {
         int nextInt = new Random().nextInt();
-        if(nextInt > 0 && nextInt < 100) {
+        if(nextInt > 0 && nextInt < 1_000_000) {
+                logger.info("!!!!! Anomaly detected !!!!!");
             return Optional.ofNullable(new Anomaly(LocalDateTime.now(), "room1", 100.0));
         } else {
             return Optional.empty();
