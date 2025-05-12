@@ -10,7 +10,7 @@ docker-compose -f docker-compose-kafka-kraft.yml up -d
 ```
 
 ### 2 Run init script
-
+Wait for 20 seconds after previous step.
 ```Shell
 ./scripts/init.sh
 ```
@@ -34,7 +34,7 @@ docker-compose -f compose.yml down
 ```
 
 ### 6 Clean Kafka consumer groups and topics.
-
+Wait for 30 seconds after previous step.
 ```Shell
 ./scripts/clean.sh
 ```
