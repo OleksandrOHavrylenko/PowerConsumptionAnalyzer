@@ -21,19 +21,19 @@ docker-compose -f docker-compose-kafka-kraft.yml up -d
 docker-compose -f compose.yml up -d --build && docker-compose rm -f
 ```
 
-### 4 Check the result of top five domains from the history.csv file an endpoint.
+### 4 Check the result on power-anomalies-consumer microservice.
 
 ```Shell
-curl -X GET http://localhost:8080/topFiveDomains
+docker logs power-anomalies-consumer --follow
 ```
 
-### 5 Stop history producer and consumer
+### 5 Stop power-consumption microservices.
 
 ```Shell
 docker-compose -f compose.yml down
 ```
 
-### 6 Remove Kafka consumer groups and topics after test.
+### 6 Clean Kafka consumer groups and topics.
 
 ```Shell
 ./scripts/clean.sh

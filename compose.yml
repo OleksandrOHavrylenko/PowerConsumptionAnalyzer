@@ -13,6 +13,8 @@ services:
       OUTPUT_TOPIC: "input-power"
       DEAD_LETTER_QUEUE: "dlq"
       INPUT_FILE_PATH: "input/power_consumption_data.txt"
+    depends_on:
+      - power-processor
 
   power-processor:
     container_name: power-processor
@@ -27,7 +29,19 @@ services:
       OUTPUT_TOPIC: "power-anomalies"
       APP_ID: "power-consumption-processor"
     depends_on:
-      - power-generator
+      - power-anomalies-consumer
+
+  power-anomalies-consumer:
+    container_name: power-anomalies-consumer
+    image: power-anomalies-consumer
+    build:
+      context: .
+      dockerfile: Dockerfile-anomaly-consumer
+    networks:
+      - kafka-net
+    environment:
+      INPUT_TOPIC: "power-anomalies"
+      APP_ID: "power-anomalies-consumer"
 
 networks:
   kafka-net:

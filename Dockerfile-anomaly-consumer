@@ -1,0 +1,29 @@
+# Stage 1: Build the application
+FROM gradle:8.13.0-jdk17-alpine AS build
+WORKDIR /app
+
+# Copy the Gradle wrapper and build files
+COPY gradlew .
+COPY gradle ./gradle
+
+# Copy the build configuration and source code
+COPY ./power-consumption-commons ./power-consumption-commons
+COPY ./power-consumption-anomalies-consumer ./power-consumption-anomalies-consumer
+COPY settings.gradle ./
+
+# Build the application
+RUN ./gradlew clean bootJar
+
+# Stage 2: Create the runtime image
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+
+# Copy the JAR file from the build stage
+COPY --from=build /app/power-consumption-anomalies-consumer/build/libs/*.jar power-consumption-anomalies-consumer.jar
+
+ENV INPUT_TOPIC="power-anomalies"
+ENV BOOTSTRAP_SERVERS="broker-1:19092, broker-2:19092, broker-3:19092"
+ENV APP_ID="power-anomalies-consumer"
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "power-consumption-anomalies-consumer.jar"]
