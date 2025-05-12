@@ -1,10 +1,10 @@
 package com.example.iot.serdes;
 
 import com.example.iot.model.Anomaly;
+import com.example.iot.serialization.AnomalyDeserializer;
+import com.example.iot.serialization.AnomalySerializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
 
 /**
  * @author Oleksandr Havrylenko
@@ -12,9 +12,6 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 public final class CustomSerdes {
     private CustomSerdes() {}
     public static Serde<Anomaly> Anomaly() {
-        JsonSerializer<Anomaly> serializer = new JsonSerializer<>();
-        JsonDeserializer<Anomaly> deserializer = new JsonDeserializer<>(Anomaly.class);
-        return Serdes.serdeFrom(serializer, deserializer);
+        return Serdes.serdeFrom(new AnomalySerializer(), new AnomalyDeserializer());
     }
-
 }
