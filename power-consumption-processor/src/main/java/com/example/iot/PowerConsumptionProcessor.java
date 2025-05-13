@@ -46,14 +46,14 @@ public class PowerConsumptionProcessor {
                                 .withTimestampExtractor(new PowerConsTimestampExtractor())
                 );
 
-        final Duration windowSize = Duration.ofDays(1);
+        final Duration windowSize = Duration.ofHours(3);
         final TimeWindows tumblingWindow  =  TimeWindows.of(windowSize);
 
         inputPowerStream
                 .mapValues(this::parseLine)
                 .filter((key, value) -> value.isPresent())
                 .mapValues(Optional::get)
-                .peek((key, value) -> logger.debug("key: " + key + " value: " + value))
+                .peek((key, value) -> logger.info("key: " + key + " value: " + value))
                 .groupBy((key, value) -> "", Grouped.with(Serdes.String(), CustomSerdes.PowerConsItem()))
                 .windowedBy(tumblingWindow)
                 .aggregate(ArrayList::new, this::aggregate, Materialized.<String, ArrayList<PowerConsItem>, WindowStore<Bytes, byte[]>>as(ANOMALIES_DETECTED_STORE)

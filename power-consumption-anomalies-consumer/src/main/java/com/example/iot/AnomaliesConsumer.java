@@ -3,15 +3,15 @@ package com.example.iot;
 import com.example.iot.model.Anomaly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Oleksandr Havrylenko
  **/
-@Configuration
-public class AnomaliesConsumerConfig {
-    private static final Logger logger = LoggerFactory.getLogger(AnomaliesConsumerConfig.class);
+@Component
+public class AnomaliesConsumer {
+    private static final Logger logger = LoggerFactory.getLogger(AnomaliesConsumer.class);
 
     @KafkaListener(topics = "${input.topics}")
     public void sinkToConsole(Anomaly anomaly) {

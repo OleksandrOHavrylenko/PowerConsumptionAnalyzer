@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 public class PowerConsumerAnomalyDetector implements AnomalyDetector{
     private static final Logger logger = LoggerFactory.getLogger(PowerConsumerAnomalyDetector.class);
 //    public static final double SIGMA_COEFFICIENT = 2.7;
-    public static final double SIGMA_COEFFICIENT = 3.375;
+    public static final double SIGMA_COEFFICIENT = 5;
 
     @Override
     public List<Anomaly> detect(Windowed<String> localDateWindowed, ArrayList<PowerConsItem> arrayList) {
