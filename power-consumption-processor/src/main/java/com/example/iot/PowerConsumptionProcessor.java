@@ -1,6 +1,7 @@
 package com.example.iot;
 
 import com.example.iot.detector.AnomalyDetector;
+import com.example.iot.extractor.PowerConsTimestampExtractor;
 import com.example.iot.mapper.ModelMapper;
 import com.example.iot.mapper.PowerConsMapper;
 import com.example.iot.model.PowerConsItem;
@@ -40,21 +41,21 @@ public class PowerConsumptionProcessor {
     @Autowired
     void process(final StreamsBuilder streamsBuilder) {
         KStream<String, String> inputPowerStream = streamsBuilder
-                .stream(INPUT_TOPIC, Consumed.with(Serdes.String(), Serdes.String()));
+                .stream(INPUT_TOPIC,
+                        Consumed.with(Serdes.String(), Serdes.String())
+                                .withTimestampExtractor(new PowerConsTimestampExtractor())
+                );
 
-        final Duration windowSize = Duration.ofSeconds(10);
-        final Duration advanceSize = Duration.ofSeconds(1);
-
-        final TimeWindows hoppingWindow =  TimeWindows.of(windowSize).advanceBy(advanceSize);
+        final Duration windowSize = Duration.ofMinutes(30);
+        final TimeWindows tumblingWindow  =  TimeWindows.of(windowSize);
 
         inputPowerStream
                 .mapValues(this::parseLine)
                 .filter((key, value) -> value.isPresent())
                 .mapValues(Optional::get)
                 .peek((key, value) -> logger.info("key: " + key + " value: " + value))
-//                .groupBy((key, domain) -> domain, Grouped.with(Serdes.String(), Serdes.String()))
-                .groupBy((key, value) -> value.date().toString(), Grouped.with(Serdes.String(), CustomSerdes.PowerConsItem()))
-                .windowedBy(hoppingWindow)
+                .groupBy((key, value) -> "", Grouped.with(Serdes.String(), CustomSerdes.PowerConsItem()))
+                .windowedBy(tumblingWindow)
                 .aggregate(ArrayList::new, this::aggregate, Materialized.<String, ArrayList<PowerConsItem>, WindowStore<Bytes, byte[]>>as(ANOMALIES_DETECTED_STORE)
                         .withKeySerde(Serdes.String())
                         .withValueSerde(CustomSerdes.ArrayListOfPowerConsItems()))
@@ -62,7 +63,6 @@ public class PowerConsumptionProcessor {
                 .mapValues(anomalyDetector::detect)
                 .filter((key, value) -> value.isPresent())
                 .map((key,value) -> KeyValue.pair(value.get().room(), value.get()))
-//                .mapValues(Optional::get)
                 .peek((key, value) -> logger.info("Output => key: " + key + " value: " + value))
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), CustomSerdes.Anomaly()));
     }

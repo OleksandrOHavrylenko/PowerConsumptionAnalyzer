@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.apache.kafka.streams.StreamsConfig.*;
-import static org.apache.kafka.streams.StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG;
 
 /**
  * @author Oleksandr Havrylenko
