@@ -1,23 +1,24 @@
 package com.example.iot;
 
+import com.example.iot.detector.AnomalyDetector;
 import com.example.iot.mapper.ModelMapper;
 import com.example.iot.mapper.PowerConsMapper;
-import com.example.iot.model.Anomaly;
 import com.example.iot.model.PowerConsItem;
 import com.example.iot.serdes.CustomSerdes;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.utils.Bytes;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.state.WindowStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Random;
 
 /**
  * @author Oleksandr Havrylenko
@@ -31,34 +32,44 @@ public class PowerConsumptionProcessor {
             .getOrDefault("OUTPUT_TOPIC", "power-anomalies");
     public static final String ANOMALIES_DETECTED_STORE = "anomalies-detected-store";
 
-    private ModelMapper<PowerConsItem> modelMapper = new PowerConsMapper();
+    @Autowired
+    private AnomalyDetector anomalyDetector;
+    private final ModelMapper<PowerConsItem> modelMapper = new PowerConsMapper();
+
 
     @Autowired
     void process(final StreamsBuilder streamsBuilder) {
         KStream<String, String> inputPowerStream = streamsBuilder
                 .stream(INPUT_TOPIC, Consumed.with(Serdes.String(), Serdes.String()));
 
+        final Duration windowSize = Duration.ofSeconds(10);
+        final Duration advanceSize = Duration.ofSeconds(1);
+
+        final TimeWindows hoppingWindow =  TimeWindows.of(windowSize).advanceBy(advanceSize);
+
         inputPowerStream
                 .mapValues(this::parseLine)
                 .filter((key, value) -> value.isPresent())
                 .mapValues(Optional::get)
                 .peek((key, value) -> logger.info("key: " + key + " value: " + value))
-                .mapValues(this::detectAnomalies)
+//                .groupBy((key, domain) -> domain, Grouped.with(Serdes.String(), Serdes.String()))
+                .groupBy((key, value) -> value.date().toString(), Grouped.with(Serdes.String(), CustomSerdes.PowerConsItem()))
+                .windowedBy(hoppingWindow)
+                .aggregate(ArrayList::new, this::aggregate, Materialized.<String, ArrayList<PowerConsItem>, WindowStore<Bytes, byte[]>>as(ANOMALIES_DETECTED_STORE)
+                        .withKeySerde(Serdes.String())
+                        .withValueSerde(CustomSerdes.ArrayListOfPowerConsItems()))
+                .toStream()
+                .mapValues(anomalyDetector::detect)
                 .filter((key, value) -> value.isPresent())
-                .mapValues(Optional::get)
+                .map((key,value) -> KeyValue.pair(value.get().room(), value.get()))
+//                .mapValues(Optional::get)
                 .peek((key, value) -> logger.info("Output => key: " + key + " value: " + value))
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), CustomSerdes.Anomaly()));
     }
 
-//    TODO fake method just for streams testing. Change to real AnomalyDetector
-    private Optional<Anomaly> detectAnomalies(final String key, final PowerConsItem powerConsItem) {
-        int nextInt = new Random().nextInt();
-        if(nextInt > 0 && nextInt < 1_000_000) {
-                logger.info("!!!!! Anomaly detected !!!!!");
-            return Optional.ofNullable(new Anomaly(LocalDateTime.now(), "room1", 100.0));
-        } else {
-            return Optional.empty();
-        }
+    private ArrayList<PowerConsItem> aggregate(String date, PowerConsItem powerConsItem, ArrayList<PowerConsItem> arrayList) {
+        arrayList.add(powerConsItem);
+        return arrayList;
     }
 
     private Optional<PowerConsItem> parseLine(final String line) {
