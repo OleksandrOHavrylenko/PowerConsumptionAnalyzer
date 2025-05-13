@@ -46,14 +46,14 @@ public class PowerConsumptionProcessor {
                                 .withTimestampExtractor(new PowerConsTimestampExtractor())
                 );
 
-        final Duration windowSize = Duration.ofMinutes(30);
+        final Duration windowSize = Duration.ofDays(1);
         final TimeWindows tumblingWindow  =  TimeWindows.of(windowSize);
 
         inputPowerStream
                 .mapValues(this::parseLine)
                 .filter((key, value) -> value.isPresent())
                 .mapValues(Optional::get)
-                .peek((key, value) -> logger.info("key: " + key + " value: " + value))
+                .peek((key, value) -> logger.debug("key: " + key + " value: " + value))
                 .groupBy((key, value) -> "", Grouped.with(Serdes.String(), CustomSerdes.PowerConsItem()))
                 .windowedBy(tumblingWindow)
                 .aggregate(ArrayList::new, this::aggregate, Materialized.<String, ArrayList<PowerConsItem>, WindowStore<Bytes, byte[]>>as(ANOMALIES_DETECTED_STORE)
@@ -61,9 +61,9 @@ public class PowerConsumptionProcessor {
                         .withValueSerde(CustomSerdes.ArrayListOfPowerConsItems()))
                 .toStream()
                 .mapValues(anomalyDetector::detect)
-                .filter((key, value) -> value.isPresent())
-                .map((key,value) -> KeyValue.pair(value.get().room(), value.get()))
-                .peek((key, value) -> logger.info("Output => key: " + key + " value: " + value))
+                .flatMapValues(v -> v)
+                .map((key,value) -> KeyValue.pair(value.room(), value))
+                .peek((key, value) -> logger.debug("Output => key: " + key + " value: " + value))
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), CustomSerdes.Anomaly()));
     }
 

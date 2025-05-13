@@ -5,11 +5,11 @@ import com.example.iot.model.PowerConsItem;
 import org.apache.kafka.streams.kstream.Windowed;
 
 import java.util.ArrayList;
-import java.util.Optional;
+import java.util.List;
 
 /**
  * @author Oleksandr Havrylenko
  **/
 public interface AnomalyDetector {
-    Optional<Anomaly> detect(Windowed<String> localDateWindowed, ArrayList<PowerConsItem> arrayList);
+    List<Anomaly> detect(Windowed<String> localDateWindowed, ArrayList<PowerConsItem> arrayList);
 }
