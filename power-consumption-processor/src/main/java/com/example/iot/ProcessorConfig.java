@@ -1,5 +1,8 @@
 package com.example.iot;
 
+import com.example.iot.mapper.ModelMapper;
+import com.example.iot.mapper.PowerConsMapper;
+import com.example.iot.model.PowerConsItem;
 import org.apache.kafka.common.serialization.Serdes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,5 +33,10 @@ public class ProcessorConfig {
         props.put(DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
         return new KafkaStreamsConfiguration(props);
+    }
+
+    @Bean
+    public ModelMapper<PowerConsItem> modelMapper() {
+        return new PowerConsMapper();
     }
 }

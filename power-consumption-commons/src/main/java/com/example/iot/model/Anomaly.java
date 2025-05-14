@@ -5,5 +5,5 @@ import java.time.LocalDateTime;
 /**
  * @author Oleksandr Havrylenko
  **/
-public record Anomaly(LocalDateTime dateTime, String room, double peak) {
+public record Anomaly(LocalDateTime date, String room, double peak) {
 }

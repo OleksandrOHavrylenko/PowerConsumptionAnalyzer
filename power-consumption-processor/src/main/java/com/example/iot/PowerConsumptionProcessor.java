@@ -3,7 +3,6 @@ package com.example.iot;
 import com.example.iot.detector.AnomalyDetector;
 import com.example.iot.extractor.PowerConsTimestampExtractor;
 import com.example.iot.mapper.ModelMapper;
-import com.example.iot.mapper.PowerConsMapper;
 import com.example.iot.model.PowerConsItem;
 import com.example.iot.serdes.CustomSerdes;
 import org.apache.kafka.common.serialization.Serdes;
@@ -35,8 +34,8 @@ public class PowerConsumptionProcessor {
 
     @Autowired
     private AnomalyDetector anomalyDetector;
-    private final ModelMapper<PowerConsItem> modelMapper = new PowerConsMapper();
-
+    @Autowired
+    private ModelMapper<PowerConsItem> modelMapper;
 
     @Autowired
     void process(final StreamsBuilder streamsBuilder) {
@@ -47,7 +46,7 @@ public class PowerConsumptionProcessor {
                 );
 
         final Duration windowSize = Duration.ofHours(3);
-        final TimeWindows tumblingWindow  =  TimeWindows.of(windowSize);
+        final TimeWindows tumblingWindow = TimeWindows.ofSizeWithNoGrace(windowSize);
 
         inputPowerStream
                 .mapValues(this::parseLine)
@@ -67,7 +66,7 @@ public class PowerConsumptionProcessor {
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), CustomSerdes.Anomaly()));
     }
 
-    private ArrayList<PowerConsItem> aggregate(String date, PowerConsItem powerConsItem, ArrayList<PowerConsItem> arrayList) {
+    private ArrayList<PowerConsItem> aggregate(final String date, final PowerConsItem powerConsItem, final ArrayList<PowerConsItem> arrayList) {
         arrayList.add(powerConsItem);
         return arrayList;
     }

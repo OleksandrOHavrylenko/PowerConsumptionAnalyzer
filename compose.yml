@@ -27,6 +27,7 @@ services:
     environment:
       INPUT_TOPIC: "input-power"
       OUTPUT_TOPIC: "power-anomalies"
+      SIGMA_COEFFICIENT: "5.0"
       APP_ID: "power-consumption-processor"
     depends_on:
       - power-anomalies-consumer
