@@ -1,7 +1,7 @@
 # How to Run Household Power Consumption Analyzer Project
 ### 0 Prepare correct power_consumption_data.txt file. 
-Put correct power_consumption_data.txt file to /input directory.
-power_consumption_data.txt file format should be like /input/power_consumption-example.txt
+> Put correct power_consumption_data.txt file to /power-consumption-generator/input directory.
+power_consumption_data.txt file format should be like /power-consumption-generator/input/power_consumption-example.txt
 
 
 ### 1 Start Kafka cluster with the command from the root folder of the project.
